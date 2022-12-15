@@ -8,18 +8,23 @@ import {
   WsResponseRegisterAck,
   WsResponseSubscribeAck,
 } from "./deps.ts";
+import { WebsocketID, WSHandler } from "./websocket.ts";
 
 export class Broker {
-  public handleRequest(request: WsRequest): WsResponse {
+  constructor(
+    protected readonly ws: Pick<WSHandler, "send" | "sendMsg" | "isConnected">
+  ) {}
+
+  public handleRequest(request: WsRequest, requester: WebsocketID): WsResponse {
     switch (request.command) {
       case "invoke":
-        return this.handleInvoke(request as WsRequestInvoke);
+        return this.handleInvoke(request as WsRequestInvoke, requester);
 
       case "register":
-        return this.handleRegister(request as WsRequestRegister);
+        return this.handleRegister(request as WsRequestRegister, requester);
 
       case "subscribe":
-        return this.handleSubscribe(request as WsRequestSubscribe);
+        return this.handleSubscribe(request as WsRequestSubscribe, requester);
 
       default:
         break;
@@ -34,16 +39,40 @@ export class Broker {
     };
   }
 
-  protected handleInvoke(request: WsRequestInvoke): WsResponseInvokeAck {
+  protected handleInvoke(
+    request: WsRequestInvoke,
+    requester: WebsocketID
+  ): WsResponseInvokeAck {
+    const id = <WebsocketID>request.id;
+
+    if (!this.ws.isConnected(id)) {
+      return {
+        command: "invokeAck",
+        conversation: request.conversation,
+        message: `RPC Error: Client {${id}} not connected`,
+        success: false,
+      };
+    }
+
+    this.ws.sendMsg(id, {
+      command: "invokeReq",
+      conversation: request.conversation,
+      payload: request.payload,
+      requester: requester,
+    });
+
     return {
       command: "invokeAck",
       conversation: request.conversation,
-      message: "Command Not Implemented",
-      success: false,
+      message: "Invokation Sent",
+      success: true,
     };
   }
 
-  protected handleRegister(request: WsRequestRegister): WsResponseRegisterAck {
+  protected handleRegister(
+    request: WsRequestRegister,
+    requester: WebsocketID
+  ): WsResponseRegisterAck {
     return {
       command: "registerAck",
       conversation: request.conversation,
@@ -53,7 +82,8 @@ export class Broker {
   }
 
   protected handleSubscribe(
-    request: WsRequestSubscribe
+    request: WsRequestSubscribe,
+    requester: WebsocketID
   ): WsResponseSubscribeAck {
     return {
       command: "subscribeAck",

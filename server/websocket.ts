@@ -1,12 +1,12 @@
 import { Broker } from "./broker.ts";
-import { WsRequest } from "./deps.ts";
+import { WsRequest, WsResponse } from "./deps.ts";
 
 export type WebsocketID = string & { _WebsocketId: never };
 
 export class WSHandler {
   protected wsClients = new Map<WebsocketID, WebSocket>();
 
-  protected broker = new Broker();
+  protected broker = new Broker(this);
 
   public get clients(): ReadonlyMap<WebsocketID, WebSocket> {
     return this.wsClients;
@@ -53,6 +53,13 @@ export class WSHandler {
     else throw new Error(`Socket ${id} not found`);
   }
 
+  /**
+   * Send a message to a client
+   */
+  public sendMsg(id: WebsocketID, message: WsResponse) {
+    this.send(id, JSON.stringify(message));
+  }
+
   public handleWebSocket(req: Request): Response {
     const { response, socket } = Deno.upgradeWebSocket(req, {
       idleTimeout: 120,
@@ -91,9 +98,9 @@ export class WSHandler {
         .join("\n")}`
     );
 
-    const response = this.broker.handleRequest(data);
+    const response = this.broker.handleRequest(data, id);
 
-    this.send(id, JSON.stringify(response));
+    this.sendMsg(id, response);
   }
 
   protected onCloseCallback(id: WebsocketID, ev: CloseEvent) {
