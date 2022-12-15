@@ -5,8 +5,6 @@ import {
   WsResponse,
 } from "./deps.ts";
 
-const DEBUG_MODE = false as const;
-
 export interface DabClientOptions {
   /**
    * The number of milliseconds to wait for a response from the server before
@@ -14,6 +12,11 @@ export interface DabClientOptions {
    * @default 500
    */
   responseTimeout?: number;
+
+  /**
+   * Enable debug mode
+   */
+  debug?: boolean;
 }
 
 export interface DabClientConnectionOptions {
@@ -48,11 +51,11 @@ export class DabClient extends EventEmitter<DabClientEvents> {
     super();
 
     this.on("open", () => {
-      DEBUG_MODE && console.debug("-> Setting Connection on open");
+      this.options.debug && console.debug("-> Setting Connection on open");
       this.connected = true;
     });
     this.on("close", () => {
-      DEBUG_MODE && console.debug("-> Setting Connection on close");
+      this.options.debug && console.debug("-> Setting Connection on close");
       this.connected = false;
     });
 
@@ -60,7 +63,7 @@ export class DabClient extends EventEmitter<DabClientEvents> {
   }
 
   public async connect(
-    connectionOptions: DabClientConnectionOptions,
+    connectionOptions: DabClientConnectionOptions
   ): Promise<this> {
     const websocket = new WebSocket(connectionOptions.broker, ["dab"]);
     this.websocket = websocket;
@@ -68,7 +71,7 @@ export class DabClient extends EventEmitter<DabClientEvents> {
     const connected = new Promise<void>((res, rej) => {
       const t = setTimeout(
         () => rej(new Error("Connection Timeout")),
-        connectionOptions.timeout ?? 1000,
+        connectionOptions.timeout ?? 1000
       );
       // websocket.addEventListener("open", () => {
       this.once("open", () => {
@@ -78,30 +81,31 @@ export class DabClient extends EventEmitter<DabClientEvents> {
     });
 
     websocket.onopen = (ev) => {
-      DEBUG_MODE && console.debug("🔬 On Open");
+      this.options.debug && console.debug("🔬 On Open");
       this.emit("open", websocket, ev).finally(
-        () => DEBUG_MODE && console.debug("🔬 Finished Emitting Open"),
+        () => this.options.debug && console.debug("🔬 Finished Emitting Open")
       );
     };
 
     websocket.onclose = (ev) => {
-      DEBUG_MODE && console.debug("🔬 On Close");
+      this.options.debug && console.debug("🔬 On Close");
       this.emit("close", websocket, ev).finally(
-        () => DEBUG_MODE && console.debug("🔬 Finished Emitting Close"),
+        () => this.options.debug && console.debug("🔬 Finished Emitting Close")
       );
     };
 
     websocket.onerror = (ev) => {
-      DEBUG_MODE && console.debug("🔬 On Error");
+      this.options.debug && console.debug("🔬 On Error");
       this.emit("error", websocket, ev).finally(
-        () => DEBUG_MODE && console.debug("🔬 Finished Emitting Error"),
+        () => this.options.debug && console.debug("🔬 Finished Emitting Error")
       );
     };
 
     websocket.onmessage = (ev) => {
-      DEBUG_MODE && console.debug("🔬 On Message");
+      this.options.debug && console.debug("🔬 On Message");
       this.emit("message", websocket, ev).finally(
-        () => DEBUG_MODE && console.debug("🔬 Finished Emitting Message"),
+        () =>
+          this.options.debug && console.debug("🔬 Finished Emitting Message")
       );
     };
 
@@ -117,7 +121,7 @@ export class DabClient extends EventEmitter<DabClientEvents> {
   >();
 
   protected onMessage(_ws: WebSocket, ev: MessageEvent) {
-    const msg = <WsResponse> JSON.parse(ev.data);
+    const msg = <WsResponse>JSON.parse(ev.data);
     const { conversation, command } = msg;
 
     if (
