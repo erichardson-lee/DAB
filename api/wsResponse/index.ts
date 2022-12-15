@@ -5,6 +5,7 @@ export type WsResponse =
   | WsResponseInvokeReq
   | WsResponseOnEvent
   | WsResponseRegisterAck
+  | WsResponseServerError
   | WsResponseSubscribeAck;
 
 export interface WsResponseInvokeAck {
@@ -30,6 +31,13 @@ export interface WsResponseOnEvent {
 
 export interface WsResponseRegisterAck {
   command: "registerAck";
+  conversation: number;
+  message: string;
+  success: boolean;
+}
+
+export interface WsResponseServerError {
+  command: "serverError";
   conversation: number;
   message: string;
   success: boolean;

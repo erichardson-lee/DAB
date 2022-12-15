@@ -68,6 +68,9 @@ mapping:
   # Acknowledgement of invokation
   invokeAck: *commandAck
 
+  # Error response to an invocation
+  serverError: *commandAck
+
   # Invocation Request from another client
   invokeReq:
     properties:
