@@ -9,8 +9,8 @@ dependencies:
 
 ### Deno
 
-This project uses deno, so you'll need to install that first.
-You can find instructions for that [here](https://deno.land/#installation).
+This project uses deno, so you'll need to install that first. You can find
+instructions for that [here](https://deno.land/#installation).
 
 ### JTD Codegen
 

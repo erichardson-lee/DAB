@@ -17,7 +17,7 @@ ws.onerror = (e) => console.log("💥 Socket errored:", e);
 ws.onclose = () => console.log("🔒 Socket closed");
 
 ws.onmessage = (e: MessageEvent) => {
-  const data = <WsResponse>JSON.parse(e.data);
+  const data = <WsResponse> JSON.parse(e.data);
   LOG_MESSAGES && console.log("📫 Recieved:", data);
 };
 

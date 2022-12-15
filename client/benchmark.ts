@@ -20,7 +20,7 @@ ws.onmessage = (e: MessageEvent) => {
   fMsgCount++;
 
   if (LOG_MESSAGES) {
-    const data = <WsResponse>JSON.parse(e.data);
+    const data = <WsResponse> JSON.parse(e.data);
 
     console.log("📫 Recieved:", data);
   }
@@ -65,11 +65,15 @@ setInterval(() => {
   perFrames.push(perFrame);
 
   console.log(
-    `📈 ${perFrame.toPrecision(
-      6
-    )} msg/${timeElapsed}ms [${pCount} total] [${getAverageFrame().toPrecision(
-      6
-    )} avg]`
+    `📈 ${
+      perFrame.toPrecision(
+        6,
+      )
+    } msg/${timeElapsed}ms [${pCount} total] [${
+      getAverageFrame().toPrecision(
+        6,
+      )
+    } avg]`,
   );
 }, TimeFrame);
 
