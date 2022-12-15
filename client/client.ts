@@ -1,25 +1,44 @@
+import { WsRequest, WsResponse } from "../api/index.ts";
+
 const ws = new WebSocket("ws://localhost:4142", ["dab"]);
+
+const LOG_MESSAGES = false as const;
 
 // Wait for WS to be open
 await new Promise<void>((res, rej) => {
   setTimeout(() => rej("timeout"), 1000);
-
-  setInterval(() => {
-    if (ws.readyState === WebSocket.OPEN) res();
-  }, 100);
+  ws.onopen = () => {
+    console.log("🌅 Socket opened");
+    res();
+  };
 });
 
-ws.onopen = () => console.log("socket opened");
-ws.onmessage = (e) => {
-  console.log("socket message:", e.data);
-};
-ws.onerror = (e) => console.log("socket errored:", e);
-ws.onclose = () => console.log("socket closed");
+ws.onerror = (e) => console.log("💥 Socket errored:", e);
+ws.onclose = () => console.log("🔒 Socket closed");
 
-ws.send("LMAO YEET!");
+ws.onmessage = (e: MessageEvent) => {
+  const data = <WsResponse>JSON.parse(e.data);
+  LOG_MESSAGES && console.log("📫 Recieved:", data);
+};
+
+const sendRequest = (data: WsRequest) => {
+  LOG_MESSAGES && console.log("🚀 Sending Request:", data);
+  ws.send(JSON.stringify(data));
+};
+
+setInterval(() => {
+  sendRequest({
+    command: "invoke",
+    conversation: Math.floor(Math.random() * 1e9),
+    id: "test",
+    payload: "AAAA",
+  });
+}, 1000);
+
+const TIMEOUT = 10e3 as const;
 
 setTimeout(() => {
-  console.log("Closing Socket");
-  ws.close(4069, "Aight Imma Head Out ✌️");
+  console.log(`⏰ Closing Socket (auto close after ${TIMEOUT}ms)`);
+  ws.close(1000, "Aight Imma Head Out ✌️");
   Deno.exit(0);
-}, 1000);
+}, TIMEOUT);

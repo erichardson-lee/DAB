@@ -1,7 +1,12 @@
+import { Broker } from "./broker.ts";
+import { WsRequest } from "./deps.ts";
+
 export type WebsocketID = string & { _WebsocketId: never };
 
 export class WSHandler {
   protected wsClients = new Map<WebsocketID, WebSocket>();
+
+  protected broker = new Broker();
 
   public get clients(): ReadonlyMap<WebsocketID, WebSocket> {
     return this.wsClients;
@@ -56,25 +61,44 @@ export class WSHandler {
     const id = <WebsocketID>crypto.randomUUID();
     console.log(`🤙 New socket connection: ${id}`);
 
-    this.wsClients.set(id, socket);
-
-    socket.onopen = () => console.log(`🌅 Socket ${id} opened`);
-
-    socket.onmessage = (e) => {
-      console.log(`📥 Message Recieved: `, e.data);
-      socket.send("Recieved " + id);
-    };
-
-    socket.onerror = (e) => {
-      if ("message" in e) console.error("❗ Socket error", e.message);
-      else console.error("❗ Socket error", e);
-    };
-
-    socket.onclose = (e) => {
-      console.log(`😢 Socket ${id} closed: ${e.code} ${e.reason}`);
-      this.wsClients.delete(id);
-    };
+    socket.onopen = (e) => this.onOpenCallback(id, socket, e);
+    socket.onmessage = (e) => this.onMessageCallback(id, e);
+    socket.onerror = (e) => this.onErrorCallback(id, e);
+    socket.onclose = (e) => this.onCloseCallback(id, e);
 
     return response;
+  }
+
+  protected onOpenCallback(id: WebsocketID, socket: WebSocket, _ev: Event) {
+    console.log(`🌅 ${id} | opened successfully`);
+    this.wsClients.set(id, socket);
+  }
+
+  protected onErrorCallback(id: WebsocketID, ev: Event | ErrorEvent) {
+    if ("message" in ev) {
+      console.error(`❗ ${id} | ${ev.message}`);
+    } else {
+      console.error(`❗ ${id} | errored:`, ev);
+    }
+  }
+
+  protected onMessageCallback(id: WebsocketID, ev: MessageEvent) {
+    const data = <WsRequest>JSON.parse(ev.data);
+    console.log(
+      `📥 ${id} | Message Recieved: \n${JSON.stringify(data, undefined, 2)
+        .split("\n")
+        .map((line) => `   | ${line}`)
+        .join("\n")}`
+    );
+
+    const response = this.broker.handleRequest(data);
+
+    this.send(id, JSON.stringify(response));
+  }
+
+  protected onCloseCallback(id: WebsocketID, ev: CloseEvent) {
+    console.log(`😢 ${id} | closed: ${ev.code} ${ev.reason}`);
+    console.log("-".repeat(Deno.consoleSize().columns));
+    this.wsClients.delete(id);
   }
 }
