@@ -13,7 +13,7 @@ import { WebsocketID, WSHandler } from "./websocket.ts";
 
 export class Broker {
   constructor(
-    protected readonly ws: Pick<WSHandler, "send" | "sendMsg" | "isConnected">,
+    protected readonly ws: Pick<WSHandler, "send" | "sendMsg" | "isConnected">
   ) {}
 
   public handleRequest(request: WsRequest, requester: WebsocketID): WsResponse {
@@ -42,10 +42,10 @@ export class Broker {
 
   protected handleInvoke(
     request: WsRequestInvoke,
-    requester: WebsocketID,
+    requester: WebsocketID
   ): WsResponseInvokeAck {
     request.id = requester;
-    const id = <WebsocketID> request.id;
+    const id = <WebsocketID>request.id;
 
     if (!this.ws.isConnected(id)) {
       return {
@@ -74,7 +74,7 @@ export class Broker {
 
   protected handleRegister(
     request: WsRequestRegister,
-    requester: WebsocketID,
+    requester: WebsocketID
   ): WsResponseRegisterAck {
     return {
       command: "registerAck",
@@ -86,7 +86,7 @@ export class Broker {
 
   protected handleSubscribe(
     request: WsRequestSubscribe,
-    requester: WebsocketID,
+    requester: WebsocketID
   ): WsResponseSubscribeAck {
     return {
       command: "subscribeAck",
