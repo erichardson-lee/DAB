@@ -135,11 +135,11 @@ export class DabClient extends EventEmitter<DabClientEvents> {
     }
 
     if (command === "serverError") {
-      console.error("💣 Server Error ", msg);
+      if (this.options.debug) console.error("💣 Server Error ", msg);
     }
 
     if (command === "invokeReq") {
-      console.log("🌟 Invoke ", msg);
+      if (this.options.debug) console.log("🌟 Invoke ", msg);
     }
   }
 
@@ -162,7 +162,7 @@ export class DabClient extends EventEmitter<DabClientEvents> {
       ...request,
       conversation,
     };
-    console.log("📩 Sending", msg);
+    if (this.options.debug) console.log("📩 Sending", msg);
 
     this.websocket?.send(JSON.stringify(msg));
 
