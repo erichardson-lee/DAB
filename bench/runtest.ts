@@ -1,6 +1,6 @@
 export async function runTest(
   workers: number,
-  runtime: number
+  runtime: number,
 ): Promise<number[]> {
   const counts: number[] = [];
   const promises = [];
@@ -19,7 +19,7 @@ export async function runTest(
         wrk.onmessageerror = (e) => {
           rej(e);
         };
-      })
+      }),
     );
   }
 

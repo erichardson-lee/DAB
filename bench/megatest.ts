@@ -23,13 +23,15 @@ const results: StatNew[] = [];
 
 for (let i = WORKERS_START; i <= WORKERS_END; i += WORKERS_STEP) {
   console.log(
-    `Running test for ${i} workers | Expected total Remaining Time: ${Duration.format(
-      (RUNS * RUNTIME * (WORKERS_END - i)) / WORKERS_STEP,
-      {
-        ignoreZero: true,
-        style: "narrow",
-      }
-    )}`
+    `Running test for ${i} workers | Expected total Remaining Time: ${
+      Duration.format(
+        (RUNS * RUNTIME * (WORKERS_END - i)) / WORKERS_STEP,
+        {
+          ignoreZero: true,
+          style: "narrow",
+        },
+      )
+    }`,
   );
   let avgThroughs!: number[];
   try {
@@ -56,7 +58,7 @@ for (let i = WORKERS_START; i <= WORKERS_END; i += WORKERS_STEP) {
 console.log("Mega Test Complete, writing results to ./results.json");
 await Deno.writeTextFile(
   "./results.json",
-  JSON.stringify(results, undefined, 2)
+  JSON.stringify(results, undefined, 2),
 );
 
 async function megaTest(WORKERS: number) {

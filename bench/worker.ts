@@ -33,10 +33,12 @@ while (work) {
 }
 console.assert(
   !logging,
-  `${name} got ${count} requests in ${Duration.format(runtime, {
-    ignoreZero: true,
-    style: "narrow",
-  })}`
+  `${name} got ${count} requests in ${
+    Duration.format(runtime, {
+      ignoreZero: true,
+      style: "narrow",
+    })
+  }`,
 );
 
 //@ts-ignore Weird typing on worker stuff
