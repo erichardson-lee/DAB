@@ -5,6 +5,7 @@ import {
   WsRequestSubscribe,
   WsResponse,
   WsResponseInvokeAck,
+  WsResponseInvokeReq,
   WsResponseRegisterAck,
   WsResponseSubscribeAck,
 } from "./deps.ts";
@@ -12,7 +13,7 @@ import { WebsocketID, WSHandler } from "./websocket.ts";
 
 export class Broker {
   constructor(
-    protected readonly ws: Pick<WSHandler, "send" | "sendMsg" | "isConnected">
+    protected readonly ws: Pick<WSHandler, "send" | "sendMsg" | "isConnected">,
   ) {}
 
   public handleRequest(request: WsRequest, requester: WebsocketID): WsResponse {
@@ -41,9 +42,10 @@ export class Broker {
 
   protected handleInvoke(
     request: WsRequestInvoke,
-    requester: WebsocketID
+    requester: WebsocketID,
   ): WsResponseInvokeAck {
-    const id = <WebsocketID>request.id;
+    request.id = requester;
+    const id = <WebsocketID> request.id;
 
     if (!this.ws.isConnected(id)) {
       return {
@@ -54,12 +56,13 @@ export class Broker {
       };
     }
 
-    this.ws.sendMsg(id, {
+    const msg: WsResponseInvokeReq = {
       command: "invokeReq",
-      conversation: request.conversation,
+      conversation: Math.floor(Math.random() * 1e12),
       payload: request.payload,
       requester: requester,
-    });
+    };
+    this.ws.sendMsg(id, msg);
 
     return {
       command: "invokeAck",
@@ -71,7 +74,7 @@ export class Broker {
 
   protected handleRegister(
     request: WsRequestRegister,
-    requester: WebsocketID
+    requester: WebsocketID,
   ): WsResponseRegisterAck {
     return {
       command: "registerAck",
@@ -83,7 +86,7 @@ export class Broker {
 
   protected handleSubscribe(
     request: WsRequestSubscribe,
-    requester: WebsocketID
+    requester: WebsocketID,
   ): WsResponseSubscribeAck {
     return {
       command: "subscribeAck",

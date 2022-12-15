@@ -57,6 +57,8 @@ export class WSHandler {
    * Send a message to a client
    */
   public sendMsg(id: WebsocketID, message: WsResponse) {
+    console.log("📫 Sending ", message);
+
     this.send(id, JSON.stringify(message));
   }
 
@@ -65,7 +67,7 @@ export class WSHandler {
       idleTimeout: 120,
       protocol: "dab",
     });
-    const id = <WebsocketID>crypto.randomUUID();
+    const id = <WebsocketID> crypto.randomUUID();
     console.log(`🤙 New socket connection: ${id}`);
 
     socket.onopen = (e) => this.onOpenCallback(id, socket, e);
@@ -90,12 +92,14 @@ export class WSHandler {
   }
 
   protected onMessageCallback(id: WebsocketID, ev: MessageEvent) {
-    const data = <WsRequest>JSON.parse(ev.data);
+    const data = <WsRequest> JSON.parse(ev.data);
     console.log(
-      `📥 ${id} | Message Recieved: \n${JSON.stringify(data, undefined, 2)
-        .split("\n")
-        .map((line) => `   | ${line}`)
-        .join("\n")}`
+      `📥 ${id} | Message Recieved: \n${
+        JSON.stringify(data, undefined, 2)
+          .split("\n")
+          .map((line) => `   | ${line}`)
+          .join("\n")
+      }`,
     );
 
     const response = this.broker.handleRequest(data, id);
