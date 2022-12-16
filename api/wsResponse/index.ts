@@ -10,42 +10,36 @@ export type WsResponse =
 
 export interface WsResponseInvokeAck {
   command: "invokeAck";
-  conversation: number;
   message: string;
   success: boolean;
 }
 
 export interface WsResponseInvokeReq {
   command: "invokeReq";
-  conversation: number;
   payload: string;
   requester: string;
 }
 
 export interface WsResponseOnEvent {
   command: "onEvent";
-  conversation: number;
   data: string;
   event: string;
 }
 
 export interface WsResponseRegisterAck {
   command: "registerAck";
-  conversation: number;
   message: string;
   success: boolean;
 }
 
 export interface WsResponseServerError {
   command: "serverError";
-  conversation: number;
   message: string;
   success: boolean;
 }
 
 export interface WsResponseSubscribeAck {
   command: "subscribeAck";
-  conversation: number;
   message: string;
   success: boolean;
 }

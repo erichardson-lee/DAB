@@ -7,14 +7,12 @@ export type WsRequest =
 
 export interface WsRequestInvoke {
   command: "invoke";
-  conversation: number;
   id: string;
   payload: string;
 }
 
 export interface WsRequestRegister {
   command: "register";
-  conversation: number;
   id: string;
   name: string;
   events?: string[];
@@ -22,7 +20,6 @@ export interface WsRequestRegister {
 
 export interface WsRequestSubscribe {
   command: "subscribe";
-  conversation: number;
   event: string;
   id: string;
 }
